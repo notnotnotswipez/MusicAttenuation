@@ -84,7 +84,10 @@ namespace MusicAttenuation
         private void RunListener() {
             Thread runThread = new Thread(() => {
                 Process process = new Process();
-                process.StartInfo.FileName = MUSIC_LISTENER_PROGRAM_PATH;
+                process.StartInfo.FileName = "cmd.exe";
+                process.StartInfo.Arguments = $"/c start \"\" \"{MUSIC_LISTENER_PROGRAM_PATH}\"";
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.CreateNoWindow = true;
 
                 process.Start();
             });
