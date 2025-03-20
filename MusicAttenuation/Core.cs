@@ -1,14 +1,12 @@
-﻿using HarmonyLib;
-using Il2CppSLZ.Bonelab;
-using Il2CppSLZ.Marrow.Audio;
-using MelonLoader;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
-using UnityEngine;
+using HarmonyLib;
+using Il2CppSLZ.Bonelab;
+using Il2CppSLZ.Marrow.Audio;
+using MelonLoader;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
 
 [assembly: MelonInfo(typeof(MusicAttenuation.Core), "MusicAttenuation", "1.0.0", "notnotnotswipez", null)]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
@@ -95,28 +93,53 @@ namespace MusicAttenuation
             runThread.Start();
         }
 
-        private void ConnectTCP() {
-
-            Thread connectThread = new Thread(() =>
+        private void ConnectTCP()
+        {
+            Thread thread = new Thread(() =>
             {
-                using (TcpClient client = new TcpClient())
+                while (true) //Try and connect forever
                 {
-                    client.Connect("127.0.0.1", 45565);
-
-                    using (NetworkStream stream = client.GetStream())
+                    try
                     {
-                        byte[] buffer = new byte[1024];
+                        using (TcpClient tcpClient = new TcpClient())
+                        {
+                           
+                            tcpClient.Connect("127.0.0.1", 45565);
 
-                        while (client.Connected) {
-                            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                            latestValue = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                            using (NetworkStream networkStream = tcpClient.GetStream())
+                            {
+                                byte[] buffer = new byte[1024];
+                                
+                                while (tcpClient.Connected)
+                                {
+                                    int count = networkStream.Read(buffer, 0, buffer.Length);
+                                    latestValue = Encoding.UTF8.GetString(buffer, 0, count);
+                                }
+                            }
                         }
                     }
+                    catch (SocketException ex)
+                    {
+                        // dunno if this works but some bullshit for debugging :)
+                        MelonLogger.Msg("SocketException: " + ex.Message);
+                    }
+                    catch (IOException ex)
+                    {
+                        // dunno if this works but some bullshit for debugging :), AGAIN!
+                        MelonLogger.Msg("SocketException: " + ex.Message);
+                    }
+
+                    
+                    Thread.Sleep(1000);
                 }
-            });
-            
-            connectThread.Start();
+            })
+            {
+                IsBackground = true
+            };
+
+            thread.Start();
         }
+
 
 
         [HarmonyPatch(typeof(AudioMixer), nameof(AudioMixer.SetFloat))]
