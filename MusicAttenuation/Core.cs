@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using HarmonyLib;
 using Il2CppSLZ.Bonelab;
+using BoneLib.Notifications;
 using Il2CppSLZ.Marrow.Audio;
 using MelonLoader;
 using UnityEngine.Audio;
@@ -120,13 +121,31 @@ namespace MusicAttenuation
                     }
                     catch (SocketException ex)
                     {
-                        // dunno if this works but some bullshit for debugging :)
+                        // Error Catch
                         MelonLogger.Msg("SocketException: " + ex.Message);
+                        var notif = new Notification
+                        {
+                            Title = "ERROR",
+                            Message = "Music Attenuation failed to connect to socket, try disabling your firewall!",
+                            Type = NotificationType.Error,
+                            ShowTitleOnPopup = true,
+                            PopupLength = 4f
+                        };
+                        Notifier.Send(notif);
                     }
                     catch (IOException ex)
                     {
-                        // dunno if this works but some bullshit for debugging :), AGAIN!
+                        // Error Catch, AGAIN!
                         MelonLogger.Msg("SocketException: " + ex.Message);
+                        var notif = new Notification
+                        {
+                            Title = "ERROR",
+                            Message = "Music Attenuation failed to connect to socket, try disabling your firewall!",
+                            Type = NotificationType.Error,
+                            ShowTitleOnPopup = true,
+                            PopupLength = 4f
+                        };
+                        Notifier.Send(notif);
                     }
 
                     
